@@ -81,13 +81,14 @@ namespace MU3Input
             {
                 BeginInvoke(new Action(() =>
                 {
+                    Console.WriteLine(data);
                     _left[0].BackColor = Color.FromArgb(
                         (int)((data >> 23) & 1) * 255,
-                        (int)((data >> 19) & 1) * 255,
+                        (int)((data >> 20) & 1) * 255,
                         (int)((data >> 22) & 1) * 255
                     );
                     _left[1].BackColor = Color.FromArgb(
-                        (int)((data >> 20) & 1) * 255,
+                        (int)((data >> 19) & 1) * 255,
                         (int)((data >> 21) & 1) * 255,
                         (int)((data >> 18) & 1) * 255
                     );
@@ -140,6 +141,21 @@ namespace MU3Input
             }
             
             _io.SetAimiId(aimiId);
+        }
+
+        private void btnTest_Click(object sender, EventArgs e)
+        {
+            
+        }
+
+        private void btnTest_MouseDown(object sender, MouseEventArgs e)
+        {
+            Mu3Io.btn = 3;
+        }
+
+        private void btnTest_MouseUp(object sender, MouseEventArgs e)
+        {
+            Mu3Io.btn = 0;
         }
     }
 }

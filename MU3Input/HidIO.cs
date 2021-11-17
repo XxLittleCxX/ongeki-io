@@ -49,29 +49,31 @@ namespace MU3Input
         private OutputData _data;
 
         public OutputData Data => _data;
-        
+
         public bool IsConnected => _openCount > 0;
 
-        public byte LeftButton =>
-            (byte) (_data.Buttons[0] << 0
+        public byte LeftButton => _data.Buttons == null ? (byte)0 :
+            (byte)(_data.Buttons[0] << 0
                     | _data.Buttons[1] << 1
                     | _data.Buttons[2] << 2
                     | _data.Buttons[3] << 3
                     | _data.Buttons[4] << 4);
 
-        public byte RightButton =>
-            (byte) (_data.Buttons[5] << 0
+        public byte RightButton => _data.Buttons == null ? (byte)0 :
+            (byte)(_data.Buttons[5] << 0
                     | _data.Buttons[6] << 1
                     | _data.Buttons[7] << 2
                     | _data.Buttons[8] << 3
                     | _data.Buttons[9] << 4);
 
+        public byte TestButton { get; set; } = 0;
+
         public short Lever
         {
             get
             {
-                var value = Math.Pow(_data.Lever / 1023.0, 0.4545) - 0.5;
-                return (short) (value * 32766);
+                //var value = Math.Pow(_data.Lever / 1023.0, 0.4545) - 0.5;
+                return (short)((_data.Lever * 128) - (32736 * 2));//(short)(value * 32736);//
             }
         }
 
@@ -97,7 +99,7 @@ namespace MU3Input
             var handle = GCHandle.Alloc(bytes, GCHandleType.Pinned);
             try
             {
-                return (T) Marshal.PtrToStructure(handle.AddrOfPinnedObject(), typeof(T));
+                return (T)Marshal.PtrToStructure(handle.AddrOfPinnedObject(), typeof(T));
             }
             finally
             {
@@ -123,34 +125,34 @@ namespace MU3Input
                 _data = ByteArrayToStructure<OutputData>(_inBuffer);
             }
         }
-        
+
         private static int[] bitPosMap =
         {
-            23, 19, 22, 20, 21, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6
+            23, 20, 22, 19, 21, 18, 17, 16, 15, 14, 13, 12, 11, 10, 9, 8, 7, 6
         };
 
         public unsafe void SetLed(uint data)
         {
             if (!IsConnected)
                 return;
-            
+
             SetLedInput led;
             led.Type = 0;
-            led.LedBrightness = 40;
+            led.LedBrightness = 120;
 
             for (var i = 0; i < 9; i++)
             {
-                led.LedColors[i] = (byte) (((data >> bitPosMap[i]) & 1) * 255);
-                led.LedColors[i + 15] = (byte) (((data >> bitPosMap[i + 9]) & 1) * 255);
+                led.LedColors[i] = (byte)(((data >> bitPosMap[i]) & 1) * 255);
+                led.LedColors[i + 15] = (byte)(((data >> bitPosMap[i + 9]) & 1) * 255);
             }
-            
+
             var outBuffer = new byte[64];
             fixed (void* d = outBuffer)
                 CopyMemory(d, &led, 64);
 
             _hid.Send(0, outBuffer, 64, 1000);
         }
-        
+
         public unsafe void SetAimiId(byte[] id)
         {
             if (!IsConnected)
@@ -158,10 +160,10 @@ namespace MU3Input
 
             SetOptionInput input;
             input.Type = 1;
-            
-            fixed(void* src = id)
+
+            fixed (void* src = id)
                 CopyMemory(input.AimiId, src, 10);
-            
+
             var outBuffer = new byte[64];
             fixed (void* d = outBuffer)
                 CopyMemory(d, &input, 64);
@@ -170,6 +172,6 @@ namespace MU3Input
         }
 
         [DllImport("kernel32.dll", EntryPoint = "CopyMemory", SetLastError = false)]
-        private static extern unsafe void CopyMemory(void *dest, void *src, int count);
+        private static extern unsafe void CopyMemory(void* dest, void* src, int count);
     }
 }

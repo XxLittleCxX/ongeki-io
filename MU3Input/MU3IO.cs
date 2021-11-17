@@ -8,6 +8,7 @@ namespace MU3Input
     {
         internal static HidIO Io;
         private static IOTest _test;
+        public static byte btn = 0;
 
         [DllExport(ExportName = "mu3_io_get_api_version")]
         public static ushort GetVersion()
@@ -48,7 +49,7 @@ namespace MU3Input
         [DllExport(CallingConvention.Cdecl, ExportName = "mu3_io_get_opbtns")]
         public static void GetOpButtons(out byte opbtn)
         {
-            opbtn = 0;
+            opbtn = btn;
         }
 
         [DllExport(CallingConvention.Cdecl, ExportName = "mu3_io_get_gamebtns")]
