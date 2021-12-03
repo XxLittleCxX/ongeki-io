@@ -15,8 +15,11 @@ namespace component {
         }
 
         void update() {
-            ongeki_hardware::read_io(pOutputData);
-            RawHID.write(outBuffer, 64);
+            bool updated = ongeki_hardware::read_io(pOutputData);
+            if(updated){
+                RawHID.write(outBuffer, 64);
+            }
+            
 
             if (RawHID.available()) {
                 RawHID.readBytes(inBuffer, 64);

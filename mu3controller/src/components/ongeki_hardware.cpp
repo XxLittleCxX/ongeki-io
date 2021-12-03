@@ -28,14 +28,25 @@ namespace component
             FastLED.addLeds<WS2812B, LED_PIN, GRB>(lightColors, 6);
         }
 
-        void read_io(raw_hid::output_data_t *data)
+        bool read_io(raw_hid::output_data_t *data)
         {
+            bool updated = false;
             for (auto i = 0; i < 10; i++)
             {
-                data->buttons[i] = digitalRead(PIN_MAP[i]) == LOW;
+                auto read = digitalRead(PIN_MAP[i]) ==
+                            ((i == 3 || i == 8) ? HIGH : LOW);
+                if (read != data->buttons[i])
+                {
+                    data->buttons[i] = read;
+                    updated = true;
+                }
             }
 
-            data->lever = analogRead(LEVER);
+            auto read = analogRead(LEVER);
+            if(read != data->lever){
+                data->lever = read;
+                updated = true;
+            }
 
             if (data->buttons[4] && data->buttons[9])
             {
@@ -47,6 +58,7 @@ namespace component
                 memset(&data->aimi_id, 0, 10);
                 data->scan = false;
             }
+            return updated;
         }
 
         void set_led(raw_hid::led_t &data)
@@ -55,15 +67,16 @@ namespace component
 
             //for(int i = 0; i < 3; i++) {
             //    memcpy(&lightColors[2-i], &data.ledColors[i], 3);
-                //memcpy(&lightColors[i + 3], &data.ledColors[i + 5], 3);
+            //memcpy(&lightColors[i + 3], &data.ledColors[i + 5], 3);
             //}
-            for(int i=0;i<3;i++){
+            for (int i = 0; i < 3; i++)
+            {
                 // game 0 -> 2
-                
-                memcpy(&lightColors[5-i], &data.ledColors[i], 3);
-                memcpy(&lightColors[2-i], &data.ledColors[i + 5], 3);
+
+                memcpy(&lightColors[5 - i], &data.ledColors[i], 3);
+                memcpy(&lightColors[2 - i], &data.ledColors[i + 5], 3);
             }
-             /*for(int i=5;i<8;i++){
+            /*for(int i=5;i<8;i++){
                 memcpy(&lightColors[10-i], &data.ledColors[i], 3);
             }*/
 
