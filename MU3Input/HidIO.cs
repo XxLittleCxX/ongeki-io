@@ -14,8 +14,8 @@ namespace MU3Input
         public ushort Lever;
         [MarshalAs(UnmanagedType.U1)] public bool Scan;
 
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 10)]
-        public byte[] AimiId;
+        [MarshalAs(UnmanagedType.U8)]
+        public ulong FelicaId;
     }
 
     [StructLayout(LayoutKind.Sequential, Pack = 1, Size = 64)]
@@ -33,8 +33,8 @@ namespace MU3Input
     {
         public byte Type;
 
-        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 10)]
-        public fixed byte AimiId[10];
+        [MarshalAs(UnmanagedType.U8)]
+        public fixed byte FelicaId[8];
     }
 
     // ReSharper disable once InconsistentNaming
@@ -78,7 +78,7 @@ namespace MU3Input
         }
 
         public bool Scan => _data.Scan;
-        public byte[] AimiId => _data.AimiId;
+        public byte[] FelicaId => BitConverter.GetBytes(_data.FelicaId);
 
         public HidIO()
         {
@@ -155,20 +155,20 @@ namespace MU3Input
 
         public unsafe void SetAimiId(byte[] id)
         {
-            if (!IsConnected)
+            /*if (!IsConnected)
                 return;
 
             SetOptionInput input;
             input.Type = 1;
 
             fixed (void* src = id)
-                CopyMemory(input.AimiId, src, 10);
+                CopyMemory(input., src, 10);
 
             var outBuffer = new byte[64];
             fixed (void* d = outBuffer)
                 CopyMemory(d, &input, 64);
 
-            _hid.Send(0, outBuffer, 64, 1000);
+            _hid.Send(0, outBuffer, 64, 1000);*/
         }
 
         [DllImport("kernel32.dll", EntryPoint = "CopyMemory", SetLastError = false)]

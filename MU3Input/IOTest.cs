@@ -65,7 +65,12 @@ namespace MU3Input
 
                     if (_io.Scan)
                     {
-                        textAimiId.Text = BitConverter.ToString(_io.AimiId).Replace("-", "");
+                        textAimiId.ForeColor = Color.Red;
+                        textAimiId.Text = BitConverter.ToString(_io.FelicaId).Replace("-", "");
+                    }
+                    else
+                    {
+                        textAimiId.ForeColor = Color.Black;
                     }
                 }));
             }

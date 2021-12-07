@@ -29,10 +29,10 @@ namespace component {
                         ongeki_hardware::set_led(pInputData->led);
                         break;
                     }
-                    case 1: {
+                    /*case 1: {
                         EEPROM.put(0, pInputData->option.aimiId);
                         break;
-                    }
+                    }*/
                 }
             }
         }

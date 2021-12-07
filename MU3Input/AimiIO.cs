@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -40,10 +41,22 @@ namespace MU3Input
         [DllExport(CallingConvention = CallingConvention.Cdecl, ExportName = "aime_io_nfc_get_aime_id")]
         public static uint GetAimeId(byte unitNumber, IntPtr id, ulong size)
         {
-            if (Mu3Io.Io == null || !Mu3Io.Io.Scan) return 1;
-            
-            Marshal.Copy(Mu3Io.Io.AimiId, 0, id, 10);
-            
+            if (Mu3Io.Io == null || !Mu3Io.Io.Scan)
+            {
+                Marshal.Copy(new byte[10], 0, id, 10);
+                return 1;
+            }
+
+            byte[] aimeid = new byte[10];
+            var orig = Mu3Io.Io.FelicaId.ToString();
+
+            for (int i = 0; i < 10; i++)
+            {
+                aimeid[i] = byte.Parse(orig.Substring(Math.Min(orig.Length - 3, i * 2), 2), NumberStyles.HexNumber);
+            }
+
+            Marshal.Copy(aimeid, 0, id, 10);
+
             return 0;
         }
 

@@ -1,6 +1,9 @@
 #include "stdinclude.hpp"
 #include <EEPROM.h>
 #include <FastLED.h>
+#include <Wire.h>
+#include <PN532.h>
+#include <PN532_I2C.h>
 
 namespace component
 {
@@ -10,14 +13,45 @@ namespace component
         const int LED_PIN = PIN_A1;
         const uint8_t PIN_MAP[10] = {
             // L: A B C SIDE MENU
-            2, 3, 4, 14, 8,
+            1, 0, 4, 14, 8,
             // R: A B C SIDE MENU
             5, 6, 7, 15, 9};
 
         CRGB lightColors[6];
 
+        typedef union
+        {
+            uint8_t block[18];
+            struct
+            {
+                uint8_t IDm[8];
+                uint8_t PMm[8];
+                uint16_t SystemCode;
+            };
+        } Felica;
+        Felica felica;
+        PN532_I2C pn532i2c(Wire);
+        PN532 nfc(pn532i2c);
+        uint8_t cardtype, uid[4], uL;
+        uint16_t systemCode = 0xFFFF;
+        uint8_t requestCode = 0x01;
+
+        uint8_t AimeKey[6], BanaKey[6];
+
         void start()
         {
+            Wire.begin();
+            nfc.begin();
+            if (!nfc.getFirmwareVersion()) {
+    while (1) {
+      Serial.println("wait");
+      delay(1000);
+    }
+            }
+  
+            nfc.setPassiveActivationRetries(0x10); //设定等待次数
+            nfc.SAMConfig();
+            
             // setup pin modes for button
             for (unsigned char i : PIN_MAP)
             {
@@ -43,20 +77,30 @@ namespace component
             }
 
             auto read = analogRead(LEVER);
-            if(read != data->lever){
+            if (read != data->lever)
+            {
                 data->lever = read;
                 updated = true;
             }
 
-            if (data->buttons[4] && data->buttons[9])
+            if (nfc.felica_Polling(systemCode, requestCode, felica.IDm, felica.PMm, &felica.SystemCode, 2))
             {
-                EEPROM.get(0, data->aimi_id);
+                
+            Serial.println("success");
+                //memcpy((uint8_t *)data->felica_id, 0, 10);
+                data->felica_id = *((uint64_t *)(felica.IDm));
                 data->scan = true;
+                updated = true;
+                //cardtype = 0x20;
+                //felica.SystemCode = felica.SystemCode >> 8 | felica.SystemCode << 8;
+
+                //return true;
             }
             else
             {
-                memset(&data->aimi_id, 0, 10);
                 data->scan = false;
+                updated = true;
+                //cardtype = 0;
             }
             return updated;
         }

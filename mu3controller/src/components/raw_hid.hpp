@@ -4,9 +4,7 @@ namespace component {
     namespace raw_hid {
 
 #pragma pack(push, 1)
-        struct aimi_id_t {
-            uint8_t buffer[10];
-        };
+        typedef uint64_t aimi_id_t;
 
         struct output_data_t {
             union {
@@ -15,7 +13,7 @@ namespace component {
                     uint8_t buttons[10];
                     uint16_t lever;
                     uint8_t scan;
-                    aimi_id_t aimi_id;
+                    aimi_id_t felica_id;
                 };
             };
         };
