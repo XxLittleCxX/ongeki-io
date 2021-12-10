@@ -10,7 +10,7 @@ namespace component
         const int LED_PIN = PIN_A1;
         const uint8_t PIN_MAP[10] = {
             // L: A B C SIDE MENU
-            2, 3, 4, 14, 8,
+            1, 0, 4, 14, 8,
             // R: A B C SIDE MENU
             5, 6, 7, 15, 9};
 
